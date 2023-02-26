@@ -1,0 +1,12 @@
+###
+GET http://localhost:8080/users/show
+
+<> 2023-02-26T183909.200.json
+
+###
+POST http://localhost:8080/users/add HTTP/1.1
+Content-Type: application/json
+
+{ "username" : "newUser", "firstName": "newFirstName", "lastName": "newLastName", "email": "newEmail"}
+
+<> 2023-02-26T184029.200.json

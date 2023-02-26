@@ -1,50 +1,15 @@
-import {app, BrowserWindow, ipcMain } from 'electron';
-import path from 'path';
-import { addUser, showUsers } from './controller/users';
+import express from 'express';
+import users from './routes/users';
+import logging from './logging';
 
-let window: BrowserWindow;
+const port = 8080
+const api = express();
+api.use(express.json())
+api.use(express.urlencoded({extended: true}))
 
-const createWindow = () => {
-    console.log(path.join(__dirname, 'preload.js'))
-    window = new BrowserWindow({
-        width: 1280,
-        height: 800,
-        webPreferences: {
-            nodeIntegration: false,
-            contextIsolation: true,
-            preload: path.join(__dirname, 'preload.js')
-        }
-    })
+api.use(logging.logRequest);
+api.use('/users', users)
 
-    window.loadFile('./view/index.html').then(() => {
-        window.show();
-    }).catch((err: any) => {
-        console.error(err);
-    })
-    window.webContents.openDevTools();
-    return window;
-}
-
-app.whenReady().then(() => {
-    window = createWindow();
-})
-
-app.on('window-all-closed', () => {
-    if (process.platform !== 'darwin') app.quit()
-})
-
-app.on('activate', () => {
-    // On macOS it's common to re-create a window in the app when the
-    // dock icon is clicked and there are no other windows open.
-    if (BrowserWindow.getAllWindows().length === 0) createWindow()
-})
-
-ipcMain.handle('message', (event, obj) => {
-    return showUsers();
-})
-
-ipcMain.handle('addUser', (event, obj) => {
-    const newUser = addUser(obj);
-    console.log(showUsers())
-    return newUser
+api.listen(port, () => {
+   console.log(`Running on localhost:${port}`)
 })
